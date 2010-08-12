@@ -1,0 +1,43 @@
+# Here are bash aliases I use that relate to this template.
+# The main ones are:
+# deploy: cap deploy
+# gcam: all all changes to git with message
+# gcamp: all all changes to git with message, push
+# gcampd: add all changes to git, commit, push, deploy
+# Note: After gcam/gcamp/gcampd, include a quoted comment after the alias. For example:
+# 			gcampd 'added alises.txt, which lists my rails/git bash aliases'
+# scaffold: shortcut for ./script/generate haml_scaffold, and a great tool for quickly stubbing out an app with haml views
+
+# Ruby on Rails controls
+alias run='./script/server'
+alias r='./script/server'
+alias runp='./script/server -eproduction'
+alias console='./script/console'
+alias c='./script/console'
+alias gen='./script/generate'
+alias dj='./script/delayed_job'
+alias djwork='rake jobs:work'
+alias scaffold='./script/generate haml_scaffold'
+alias project='rails -m ~/Code/Rails/templates/master.rb -d mysql'
+alias resetdb='rake db:drop;rake db:create;rake db:migrate'
+alias mig='rake db:migrate'
+alias gem='sudo gem'
+alias deploy='cap deploy'
+alias destroy='cap deploy:destroy'
+alias destroy!='cap deploy:destroy;cap git:destroy'
+
+
+# Git aliases
+alias gst='git status'
+alias gl='git pull'
+alias gp='git push'
+alias gd='git diff | mate'
+alias gco='git checkout'
+alias gb='git branch'
+alias gba='git branch -a'
+alias gitk='gitk --all &'
+alias gc='git commit -v'
+alias gca='git commit -v -a'
+alias gcam='git add .;git commit -am'
+function gcamp() { gcam "$*";gp; }
+function gcampd() { gcam "$*";gp;deploy; }

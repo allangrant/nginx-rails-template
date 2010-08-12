@@ -1,0 +1,21 @@
+common: &common
+  adapter: mysql
+  encoding: utf8
+  reconnect: false
+  pool: 5
+  username: root
+  password:
+  socket: /var/run/mysqld/mysqld.sock
+
+development:
+  <<: *common
+  database: <%= application %>_development
+
+
+test:
+  <<: *common
+  database: <%= application %>_test
+
+production:
+  <<: *common
+  database: <%= application %>_production

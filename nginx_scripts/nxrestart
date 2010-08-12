@@ -1,0 +1,4 @@
+/etc/init.d/nginx stop
+nohup /etc/init.d/nginx start 2> /dev/null > /tmp/nohup.out
+cat /tmp/nohup.out
+rm /tmp/nohup.out

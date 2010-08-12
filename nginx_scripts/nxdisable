@@ -1,0 +1,3 @@
+echo " * Disabling domain: $1"
+rm -rf /opt/nginx/conf/sites-enabled/$1.conf
+nxrestart

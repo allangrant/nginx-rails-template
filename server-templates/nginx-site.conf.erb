@@ -1,0 +1,15 @@
+server {
+  listen 80;
+  server_name <%= domain %>;
+  rewrite ^/(.*) http://www.<%= domain %>/$1 permanent;
+}
+
+
+server {
+  listen 80;
+  server_name www.<%= domain %>;
+  root /home/rails/<%= domain %>/current/public;
+  passenger_enabled on;
+  access_log /home/rails/<%= domain %>/shared/log/nginx-access.log;
+  error_log /home/rails/<%= domain %>/shared/log/nginx-error.log;
+}

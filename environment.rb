@@ -1,0 +1,1 @@
+environment("config.action_controller.session = { :key => '_#{(1..6).map { |x| (65 + rand(26)).chr }.join}_session', :secret => '#{(1..40).map { |x| (65 + rand(26)).chr }.join}' }")

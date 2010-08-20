@@ -1,5 +1,5 @@
-gem 'haml', :version => '3.0.15', :source => 'http://gemcutter.org'
-gem 'compass', :version => '0.10.3', :source => 'http://gemcutter.org'
+gem 'haml', :version => '3.0.16', :source => 'http://gemcutter.org'
+gem 'compass', :version => '0.10.4', :source => 'http://gemcutter.org'
 run 'compass init rails . --sass-dir "app/stylesheets" --css-dir "public/stylesheets/compiled"'
 
 run "rm app/stylesheets/ie.scss"

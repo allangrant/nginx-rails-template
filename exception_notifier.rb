@@ -9,6 +9,6 @@ gsub_file 'config/environment.rb', /^end$/, <<-CODE
 end
 
 ExceptionNotifier.exception_recipients = %w(#{ERROR_EMAIL})
-ExceptionNotifier.sender_address = %("#{APPLICATION.upcase} Error" <#{ERROR_EMAIL}>)
+ExceptionNotifier.sender_address = %("#{APPLICATION.upcase} Error" <#{SYSTEM_SENDER_EMAIL}>)
 ExceptionNotifier.email_prefix = '[#{APPLICATION.upcase}] '
 CODE

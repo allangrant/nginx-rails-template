@@ -1,7 +1,8 @@
 APPLICATION = File.split(root).last                          # The application name is whatever was provided after "rails" command
 TEMPLATE_PATH = File.split(template).first
 
-ERROR_EMAIL             = "pheonix@gmail.com"                # Address that exception_notifier should send error reports to
+ERROR_EMAIL             = "allan.grant@gmail.com"            # Address that exception_notifier should send error reports to
+SYSTEM_SENDER_EMAIL     = "allan.grant.dev@gmail.com"        # Address that e-mails will send from
 SERVER_TEMPLATES_PATH   = "/home/rails/templates"            # Path to .erb templates on server, from /server-templates
 SERVER_DEPLOY_PATH      = "/home/rails"                      # Path to where all rails applications are deployed on server
 SERVER_NGINX_APPS_PATH  = "/etc/nginx/sites-available"       # Path to nginx sites-available directory
@@ -11,8 +12,8 @@ GIT_ORIGIN              = "#{GIT_SERVER}:#{APPLICATION}.git" # Git origin, in sc
 GIT_ABS_PATH            = "/home/git/\#{application}.git"    # Where git repository should be created
 SERVER_USER             = "rails"                            # Name of the user hosting rails on server
 DEFAULT_DOMAIN          = "#{APPLICATION}.com"               # Default domain of the app, and server where capistrano will connect.
-USE_PLUGIN_SUBMODULES   = true # Set to true to submodule plugins for easy updating, or false to freeze plugins at current version.
 
+USE_PLUGIN_SUBMODULES   = true # Set to true to submodule plugins for easy updating, or false to freeze plugins at current version.
 CACHED_PLUGINS_PATH     = "/var/rails_plugins" # READ BELOW: (only needed when USE_PLUGIN_SUBMODULES is true)
 # Using cached_plugin, you rewrite your plugin include paths to point to local clones of their git repositories.
 # Why? To speed up creating new rails projects or deploying via capistrano.  Since plugins are included as submodules,

@@ -3,6 +3,7 @@ APPLICATION ||= File.split(root).last
 capify!
 
 file 'config/deploy.rb', <<-CODE
+require 'fileutils'
 set :application, "#{APPLICATION}"
 set :domain, "#{SERVER_DOMAIN}"
 

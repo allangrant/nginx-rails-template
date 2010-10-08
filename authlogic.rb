@@ -295,7 +295,7 @@ CODE
 
 file 'app/models/notifier.rb', <<-CODE
 class Notifier < ActionMailer::Base
-  SYSTEM_ACCOUNT = %("#{APPLICATION.titlecase}" <pheonix8d@gmail.com>)
+  SYSTEM_ACCOUNT = %("#{APPLICATION.titlecase}" <#{SYSTEM_SENDER_EMAIL}>)
 
   def welcome(user)
     subject       'Welcome to #{APPLICATION.titlecase}'

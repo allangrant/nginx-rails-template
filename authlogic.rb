@@ -250,7 +250,7 @@ CODE
 
 file 'config/routes.rb', <<-CODE
 ActionController::Routing::Routes.draw do |map|
-  map.login '/', :controller => "user_sessions", :action => "new"
+  map.login '/', :controller => "user_sessions", :action => "new", :conditions => {:method => :get}
   map.logout 'logout', :controller => "user_sessions", :action => "destroy"
   map.register 'register', :controller => "users", :action => "new"
   map.resources :password_resets, :as => 'reset_password', :only => [:index, :create, :show, :update]

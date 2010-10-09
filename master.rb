@@ -48,7 +48,7 @@ end
 SERVER_DOMAIN = ask_with_default("What is the production server domain for this project?", DEFAULT_DOMAIN)
 
 git :init
-template "compass"
+
 template "mailer"
 template "database"
 template "scaffold"
@@ -58,6 +58,7 @@ template "exception_notifier"
 template "environment"
 template "capistrano"
 template "authlogic"
+template "compass"
 template "jquery" # Check to make sure that jquery.rb is downloading the jquery version & libraries you want.
 template "clean"
 template "git"

@@ -15,6 +15,7 @@ public/stylesheets/compiled/*
 public/system/*
 public/.htaccess
 app/stylesheets/.sass-cache
+db/schema.rb
 *~
 CODE
 

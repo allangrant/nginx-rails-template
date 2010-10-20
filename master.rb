@@ -51,6 +51,7 @@ git :init
 
 template "mailer"
 template "database"
+template "compass"
 template "scaffold"
 template "haml-scaffold"
 template "dependencies"
@@ -58,7 +59,6 @@ template "exception_notifier"
 template "environment"
 template "capistrano"
 template "authlogic"
-template "compass"
 template "jquery" # Check to make sure that jquery.rb is downloading the jquery version & libraries you want.
 template "clean"
 template "git"

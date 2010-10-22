@@ -4,16 +4,22 @@ capify!
 
 file 'config/deploy.rb', <<-CODE
 require 'fileutils'
+require 'capistrano/ext/multistage'
 set :application, "#{APPLICATION}"
 set :domain, "#{SERVER_DOMAIN}"
-
+set :staging_domain, "#{STAGING_DOMAIN}"
+set :real_host, "#{REAL_HOST}"
+set :git_server, "#{GIT_SERVER}"
 set :repository,  "#{GIT_ORIGIN}"
-server domain, :app, :web, :db, :primary => true
-set :deploy_to, "#{SERVER_DEPLOY_PATH}/\#{domain}"
+server real_host, :app, :web, :db, :primary => true
+set :deploy_to, "#{DEPLOY_PATH}"
 set :template_dir, "#{SERVER_TEMPLATES_PATH}" # where you have database.yml, mailer.yml, and nginx-site.conf.erb
 set :nginx_conf, "#{SERVER_NGINX_APPS_PATH}/\#{domain}.conf"
 set :user, "#{SERVER_USER}"
 set :scm, :git
+set :branch, "master"
+set :stages, %w(staging production)
+set :default_stage, "staging"
 
 set :use_sudo, false
 default_run_options[:pty] = true
@@ -41,22 +47,30 @@ def rake(command, options={})
   sudo_option = options[:sudo] ? "sudo" : ""
   ignore_output = options[:ignore_output] ? ";true" : ""
   path = options[:path] || release_path
-  run "cd \#{path} && \#{sudo_option} rake RAILS_ENV=production \#{command}\#{ignore_output}"
+  run "cd \#{path} && \#{sudo_option} rake RAILS_ENV=\#{rails_env} \#{command}\#{ignore_output}"
 end
 
 def god(command)
-  sudo "/opt/ruby/bin/god \#{command} \#{application}"
+  sudo "/opt/ruby/bin/god \#{command} \#{application}-\#{rails_env}"
+end
+
+def nxconf_path
+  rails_env=='staging' ? nginx_conf.gsub(domain, staging_domain) : nginx_conf
+end
+
+def current_domain
+  rails_env=='staging' ? staging_domain : domain
 end
 
 namespace :deploy do
   desc "Start the server"
   task :start do
-    sudo "nxenable \#{domain}"
+    sudo "nxenable \#{current_domain}"
     god :start
   end
   desc "Stop the server"
   task :stop do
-    sudo "nxdisable \#{domain}"
+    sudo "nxdisable \#{current_domain}"
     god :stop
   end
   desc "Restart the server"
@@ -67,7 +81,7 @@ namespace :deploy do
   desc "Completely remove deployment from the server"
   task :destroy do
     stop
-    sudo "rm -f \#{nginx_conf}"
+    sudo "rm -f \#{nxconf_path}"
     update_code unless remote_file_exists?(current_path)
     rake "db:drop", :path => current_path, :ignore_output => true
     run "rm -rf \#{deploy_to}"
@@ -104,7 +118,7 @@ namespace :deploy do
     end
   end
   task :touch_logs do
-    run "touch \#{shared_path}/log/production.log"
+    run "touch \#{shared_path}/log/#\{rails_env}.log"
     run "touch \#{shared_path}/log/nginx-access.log"
     run "touch \#{shared_path}/log/nginx-error.log"
     run "touch \#{shared_path}/log/god.log"
@@ -126,8 +140,9 @@ after "deploy:finalize_update", "deploy:symlink_shared"
 namespace :nginx do
   desc "Creates the Nginx site file"
   task :create_site do
-    template = read_remote(template_dir + '/nginx-site.conf.erb')
-    sudo_put(ERB.new(template).result(binding), nginx_conf)
+    template = read_remote("\#{template_dir}/nginx-\#{rails_env}.conf.erb")
+    sudo_put(ERB.new(template).result(binding), "\#{shared_path}/config/nginx.conf")
+    sudo "ln -nfs \#{shared_path}/config/nginx.conf \#{nxconf_path} && chown \#{user} \#{nxconf_path} && chgrp \#{user} \#{nxconf_path}"
   end
 end
 after "deploy:setup", "nginx:create_site"
@@ -137,17 +152,20 @@ namespace :db do
     template = read_remote(template_dir + '/database.yml.erb')
     put ERB.new(template).result(binding), "\#{shared_path}/config/database.yml"
   end
-
   task :symlink, :except => { :no_release => true } do
     run "ln -nfs \#{shared_path}/config/database.yml \#{release_path}/config/database.yml"
   end
-  
+  task :create do
+    rake "db:create db:migrate db:seed", :path => current_path
+  end
   task :migrate do
     rake "db:migrate", :path => current_path
   end
+  task :seed do
+    rake "db:seed", :path => current_path
+  end
   task :reset do
-    set :release_path, current_path
-    rake "db:drop"
+    rake "db:drop db:create db:migrate db:seed", :path => current_path
   end
 end
 
@@ -173,12 +191,12 @@ after "deploy:update_code", "util:remove_mkmf"
 namespace :git do
   desc "Creates the git repository"
   task :create do
-    `ssh #{GIT_SERVER} "mkdir #{GIT_ABS_PATH} && cd #{GIT_ABS_PATH} && git init --bare"`
+    `ssh \#{git_server} "mkdir #{GIT_ABS_PATH} && cd #{GIT_ABS_PATH} && git init --bare"`
     `git push origin master`
   end
   desc "Deletes the git repository"
   task :destroy do
-    `ssh #{GIT_SERVER} "rm -rf #{GIT_ABS_PATH}"`
+    `ssh \#{git_server} "rm -rf #{GIT_ABS_PATH}"`
   end
   task :submodules do
     run "cd \#{release_path}; git submodule update --init"
@@ -187,3 +205,23 @@ end
 before "gems:install", "git:submodules"
 before "deploy:setup", "git:create"
 CODE
+
+file 'config/deploy/production.rb', <<-CODE
+set :rails_env, "production"
+CODE
+
+file 'config/deploy/staging.rb', <<-CODE
+set :deploy_to, "\#{deploy_to}-staging"
+set :rails_env, "staging"
+CODE
+
+run "cp config/environments/production.rb config/environments/staging.rb"
+
+gsub_file 'config/environments/staging.rb', "# config.log_level = :debug", <<-CODE
+config.log_level = :debug
+
+# Log error messages when you accidentally call methods on nil.
+config.whiny_nils = true
+CODE
+
+gsub_file 'config/environments/staging.rb', SERVER_DOMAIN, STAGING_DOMAIN

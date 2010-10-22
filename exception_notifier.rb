@@ -1,4 +1,4 @@
-cached_plugin 'exception_notifier', 'git://github.com/rails/exception_notification.git'
+cached_plugin 'exception_notifier', 'git://github.com/allangrant/exception_notification-pre-2-3.git'
 
 gsub_file 'app/controllers/application_controller.rb', /^class ApplicationController < ActionController::Base$/, <<-CODE
 class ApplicationController < ActionController::Base

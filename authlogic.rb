@@ -363,7 +363,7 @@ class PasswordResetsController < ApplicationController
       flash[:notice] = "Password successfully updated."
       redirect_to account_url
     else
-      render :action => :edit
+      render :controller => :users, :action => :show
     end
   end
  

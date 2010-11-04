@@ -10,19 +10,20 @@ set :domain, "#{SERVER_DOMAIN}"
 set :staging_domain, "#{STAGING_DOMAIN}"
 set :real_host, "#{REAL_HOST}"
 set :git_server, "#{GIT_SERVER}"
-set :repository,  "#{GIT_ORIGIN}"
-server real_host, :app, :web, :db, :primary => true
+set :git_folder, "#{GIT_CAPISTRANO_FOLDER}"
+set :repository,  "#{GIT_CAPISTRANO_REPO}"
 set :deploy_to, "#{DEPLOY_PATH}"
-set :template_dir, "#{SERVER_TEMPLATES_PATH}" # where you have database.yml, mailer.yml, and nginx-site.conf.erb
+set :template_dir, "#{SERVER_TEMPLATES_PATH}" # where you have database.yml, mailer.yml, nginx-production.conf.erb, nginx-staging.conf.erb
 set :nginx_conf, "#{SERVER_NGINX_APPS_PATH}/\#{domain}.conf"
+set :god_path, "#{GOD_PATH}"
 set :user, "#{SERVER_USER}"
 set :scm, :git
 set :branch, "master"
 set :stages, %w(staging production)
 set :default_stage, "staging"
-
 set :use_sudo, false
 default_run_options[:pty] = true
+server real_host, :app, :web, :db, :primary => true
 
 def remote_file_exists?(full_path)
   'true' ==  capture("if [ -e \#{full_path} ]; then echo 'true'; fi").strip
@@ -114,7 +115,7 @@ namespace :deploy do
     if new_setup
       load_schema
       start
-      sudo "#{GOD_PATH} load \#{current_path}/config/god/*.rb"
+      sudo "\#{god_path} load \#{current_path}/config/god/*.rb"
     end
   end
   task :touch_logs do
@@ -142,7 +143,7 @@ namespace :nginx do
   task :create_site do
     template = read_remote("\#{template_dir}/nginx-\#{rails_env}.conf.erb")
     sudo_put(ERB.new(template).result(binding), "\#{shared_path}/config/nginx.conf")
-    sudo "ln -nfs \#{shared_path}/config/nginx.conf \#{nxconf_path} && chown \#{user} \#{nxconf_path} && chgrp \#{user} \#{nxconf_path}"
+    sudo "ln -nfs \#{shared_path}/config/nginx.conf \#{nxconf_path}"
   end
 end
 after "deploy:setup", "nginx:create_site"
@@ -169,7 +170,6 @@ namespace :db do
   end
 end
 
-after "db:reset",               "deploy:load_schema"  
 after "deploy:setup_shared",    "db:setup"   unless fetch(:skip_db_setup, false)
 after "deploy:finalize_update", "db:symlink"
 
@@ -191,12 +191,12 @@ after "deploy:update_code", "util:remove_mkmf"
 namespace :git do
   desc "Creates the git repository"
   task :create do
-    `ssh \#{git_server} "mkdir #{GIT_ABS_PATH} && cd #{GIT_ABS_PATH} && git init --bare"`
+    `ssh \#{git_server} "mkdir \#{git_folder} && cd \#{git_folder} && git init --bare"`
     `git push origin master`
   end
   desc "Deletes the git repository"
   task :destroy do
-    `ssh \#{git_server} "rm -rf #{GIT_ABS_PATH}"`
+    `ssh \#{git_server} "rm -rf \#{git_folder}"`
   end
   task :submodules do
     run "cd \#{release_path}; git submodule update --init"

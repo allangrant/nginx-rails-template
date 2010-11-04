@@ -77,12 +77,20 @@ CODE
 file 'config/god/delayed_job.rb', <<-CODE
 root = "\#{File.dirname(__FILE__)}/../.."
 
-1.times do |num|
+if File.dirname(__FILE__) =~ /staging/
+  rails_env = "staging"
+  instances = 0
+else
+  rails_env = "production"
+  instances = 1
+end
+
+instances.times do |num|
   God.watch do |w|
-    w.name = "#{APPLICATION}-dj-\#{num}"
-    w.group = "#{APPLICATION}"
+    w.name = "#{APPLICATION}-\#{rails_env}-dj-\#{num}"
+    w.group = "#{APPLICATION}-\#{rails_env}"
     w.interval = 30.seconds
-    w.start = "rake -f \#{root}/Rakefile RAILS_ENV=production jobs:work"
+    w.start = "rake -f\#{root}/Rakefile RAILS_ENV=\#{rails_env} jobs:work"
 
     w.uid = 'rails'
     w.gid = 'rails'

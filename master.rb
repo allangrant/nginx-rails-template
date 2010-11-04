@@ -13,7 +13,9 @@ DEFAULT_GIT_SERVER      = "git@allangrant.in"                # Git server, for g
 GIT_ABS_PATH            = "/home/git/\#{application}.git"    # Where git repository should be created
 DEFAULT_SERVER_DOMAIN   = "#{APPLICATION}.com"               # Default domain of the app, and server where capistrano will connect.
 GIT_SERVER              = ask_with_default("What is the git ssh username and server in format USER@HOST (ie: git@example.com): ", DEFAULT_GIT_SERVER)
-GIT_ORIGIN              = "#{GIT_SERVER}:#{APPLICATION}.git" # Git origin, in scp format. user@server:path
+GIT_ORIGIN              = "#{GIT_SERVER}:#{APPLICATION}.git" # Git origin, in scp format. user@server:path.
+GIT_CAPISTRANO_FOLDER   = '#{application}.git'               # For git, give a string to be resolved later.
+GIT_CAPISTRANO_REPO     = '#{git_server}:#{git_folder}'      # For git, give a string to be resolved later.
 comment "Putting the git repository here: #{GIT_ORIGIN}"
 SERVER_DOMAIN           = ask_with_default("What is the production server domain for this project?", DEFAULT_SERVER_DOMAIN)
 DEFAULT_STAGING_DOMAIN  = "staging.#{SERVER_DOMAIN}"         # Default domain of the app, and server where capistrano will connect.
